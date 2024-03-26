@@ -39,7 +39,7 @@ client = TelegramClient(
 )
 
 
-@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID]))
+@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID], from_users=FROM_USER_ID))
 async def my_event_handler(event):
     try:
         message = event.raw_text
