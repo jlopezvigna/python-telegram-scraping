@@ -10,9 +10,8 @@ API_ID = int(os.getenv('API_ID'))
 API_HASH = os.getenv('API_HASH')
 SESSION = os.getenv('SESSION')
 REDIRECT_TO = os.getenv('REDIRECT_TO')
-FROM_USER_ID = int(os.getenv('FROM_USER_ID'))
-FROM_USER_ID2 = int(os.getenv('FROM_USER_ID2'))
 FROM_CHAT_ID = os.getenv('FROM_CHAT_ID')
+FROM_USER_ID = int(os.getenv('FROM_USER_ID'))
 
 log_file = 'app.log'
 handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=7)
@@ -24,7 +23,6 @@ logging.basicConfig(
     handlers=[handler],
     level=logging.INFO,
 )
-
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -40,7 +38,15 @@ client = TelegramClient(
 )
 
 
-@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID], from_users=[FROM_USER_ID, FROM_USER_ID2]))
+async def get_user_entity(user_id):
+    try:
+        # Retrieve the entity of the user
+        user_entity = await client.get_entity(user_id)
+        return user_entity
+    except ValueError as e:
+        print(f"Error: {e}")
+
+
 async def my_event_handler(event):
     try:
         message = event.raw_text
@@ -58,6 +64,13 @@ async def my_event_handler(event):
 
     except (BrokenPipeError, IOError) as error:
         logger.error(f"[TelegramClientListener] {type(error).__name__}: {error}")
+
+
+@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID]))
+async def message_listener(event):
+    user_entity = await get_user_entity(FROM_USER_ID)
+    if event.message.from_id == user_entity:
+        await my_event_handler(event)
 
 logger.info("Start listening new messages")
 client.start()
