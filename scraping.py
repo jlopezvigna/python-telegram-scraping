@@ -11,6 +11,7 @@ API_HASH = os.getenv('API_HASH')
 SESSION = os.getenv('SESSION')
 REDIRECT_TO = os.getenv('REDIRECT_TO')
 FROM_USER_ID = int(os.getenv('FROM_USER_ID'))
+FROM_USER_ID2 = int(os.getenv('FROM_USER_ID2'))
 FROM_CHAT_ID = os.getenv('FROM_CHAT_ID')
 
 log_file = 'app.log'
@@ -39,7 +40,7 @@ client = TelegramClient(
 )
 
 
-@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID], from_users=FROM_USER_ID))
+@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID], from_users=[FROM_USER_ID, FROM_USER_ID2]))
 async def my_event_handler(event):
     try:
         message = event.raw_text
