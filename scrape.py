@@ -3,15 +3,19 @@ from dotenv import load_dotenv
 import os
 import logging
 from logging.handlers import TimedRotatingFileHandler
+from email_utils import send_email
 
 load_dotenv()
 
 API_ID = int(os.getenv('API_ID'))
 API_HASH = os.getenv('API_HASH')
 SESSION = os.getenv('SESSION')
-REDIRECT_TO = os.getenv('REDIRECT_TO')
 FROM_CHAT_ID = os.getenv('FROM_CHAT_ID')
-FROM_USER_ID = int(os.getenv('FROM_USER_ID'))
+FROM_USERNAME = int(os.getenv('FROM_USERNAME'))
+SUBJECT = os.getenv('SUBJECT')
+SENDER = os.getenv('SENDER')
+PASSWORD = os.getenv('PASSWORD')
+RECIPIENTS = os.getenv('RECIPIENTS')
 
 log_file = 'app.log'
 handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=7)
@@ -38,29 +42,20 @@ client = TelegramClient(
 )
 
 
-async def get_user_entity(user_id):
-    try:
-        # Retrieve the entity of the user
-        user_entity = await client.get_entity(user_id)
-        return user_entity
-    except ValueError as e:
-        print(f"Error: {e}")
-
-
 async def my_event_handler(event):
     try:
-        message = event.raw_text
+        msg = event.raw_text
+        username = event.message.sender.first_name
+        date = event.date
         is_reply = event.is_reply
-        reply_message = 'none'
-        user_id = event.message.from_id.user_id
 
-        if is_reply:
-            reply_message = await event.get_reply_message()
+        # reply_message = 'none'
+        # if is_reply:
+        #    reply_message = await event.get_reply_message()
 
-        channel = await client.get_entity(REDIRECT_TO)
-        await client.send_message(entity=channel, message=f"**{message}** reply to => *{reply_message.text}*")
+        send_email(SUBJECT, SENDER, [RECIPIENTS], PASSWORD, msg, date, username)
 
-        logger.info(f"message: {message}, isReply:{is_reply}, reply:{reply_message.text}, user_id: {user_id}, date: {event.date}")
+        logger.info(f"message: {msg}, isReply:{is_reply}, username: {username}, date: {date}")
 
     except (BrokenPipeError, IOError) as error:
         logger.error(f"[TelegramClientListener] {type(error).__name__}: {error}")
@@ -68,9 +63,9 @@ async def my_event_handler(event):
 
 @client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID]))
 async def message_listener(event):
-    user_entity = await get_user_entity(FROM_USER_ID)
-    if event.message.from_id == user_entity:
+    if event.message.sender.first_name == FROM_USERNAME:
         await my_event_handler(event)
+
 
 logger.info("Start listening new messages")
 client.start()
