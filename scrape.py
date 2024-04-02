@@ -65,7 +65,7 @@ async def my_event_handler(event):
         # reply_message = 'none'
         # if is_reply:
         #    reply_message = await event.get_reply_message()
-        
+
         send_email(SUBJECT, SENDER, [RECIPIENTS], PASSWORD, msg, formatted_date, username, saved_path)
 
         if saved_path:
@@ -79,7 +79,8 @@ async def my_event_handler(event):
 
 @client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID]))
 async def message_listener(event):
-    if hasattr(event.message, 'sender') and event.message.sender.first_name == FROM_USERNAME:
+    if hasattr(event.message, 'sender') and (
+    event.message.sender, 'first_name') and event.message.sender.first_name == FROM_USERNAME:
         await my_event_handler(event)
 
 
