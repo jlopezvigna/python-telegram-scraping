@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import logging
 from logging.handlers import TimedRotatingFileHandler
+import pytz
 from email_utils import send_email
 
 load_dotenv()
@@ -18,10 +19,15 @@ PASSWORD = os.getenv('PASSWORD')
 RECIPIENTS = os.getenv('RECIPIENTS')
 
 log_file = 'app.log'
-handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=7)
-handler.suffix = '%Y-%m-%d'
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
+
+handler = None
+if os.getenv("ENVIRONMENT") == "production":
+    handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=7)
+    handler.suffix = '%d-%m-%Y'
+else:
+    handler = logging.StreamHandler()  # Log a la consola en desarrollo
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
 
 logging.basicConfig(
     handlers=[handler],
@@ -47,23 +53,32 @@ async def my_event_handler(event):
         msg = event.raw_text
         username = event.message.sender.first_name
         date = event.date
-        is_reply = event.is_reply
 
+        desired_timezone = pytz.timezone('America/Argentina/Buenos_Aires')
+        formatted_date = date.astimezone(desired_timezone).strftime("%d-%m-%Y %H:%M")
+
+        saved_path = None
+        if event.photo:
+            saved_path = await event.download_media()
+
+        # is_reply = event.is_reply
         # reply_message = 'none'
         # if is_reply:
         #    reply_message = await event.get_reply_message()
 
-        send_email(SUBJECT, SENDER, [RECIPIENTS], PASSWORD, msg, date, username)
+        if saved_path:
+            send_email(SUBJECT, SENDER, [RECIPIENTS], PASSWORD, msg, formatted_date, username, saved_path)
+            os.remove(saved_path)
 
-        logger.info(f"message: {msg}, isReply:{is_reply}, username: {username}, date: {date}")
+        logger.info(f"User: {username}, path: {saved_path}, date: {formatted_date}")
 
     except (BrokenPipeError, IOError) as error:
         logger.error(f"[TelegramClientListener] {type(error).__name__}: {error}")
 
 
-@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID]))
+@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID, 'CoinEx_Spanish']))
 async def message_listener(event):
-    if event.message.sender.first_name == FROM_USERNAME:
+    if hasattr(event.message, 'sender') and event.message.sender.first_name != FROM_USERNAME:
         await my_event_handler(event)
 
 

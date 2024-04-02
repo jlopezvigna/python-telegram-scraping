@@ -1,9 +1,11 @@
 import smtplib
-from email.message import EmailMessage
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
-def send_email(subject, sender, recipients, password, content, date, username):
-    message = EmailMessage()
+def send_email(subject, sender, recipients, password, content, date, username, attachment_path=None):
+    message = MIMEMultipart()
     message['From'] = sender
     message['To'] = ', '.join(recipients)
     message['Subject'] = subject
@@ -15,7 +17,14 @@ def send_email(subject, sender, recipients, password, content, date, username):
     html_content = html_template.format(username=username, date=date, content=content)
 
     # Add the HTML content to the message
-    message.set_content(html_content, subtype='html')
+    message.attach(MIMEText(html_content, 'html'))
+
+    # Add attachment
+    if attachment_path:
+        with open(attachment_path, 'rb') as attachment_file:
+            attachment = MIMEApplication(attachment_file.read(), Name=attachment_path)
+            attachment['Content-Disposition'] = f'attachment; filename="{attachment_path}"'
+            message.attach(attachment)
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, ) as smtp_server:
         smtp_server.login(sender, password)
