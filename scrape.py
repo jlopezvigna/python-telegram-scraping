@@ -78,7 +78,7 @@ async def my_event_handler(event):
 
 @client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID, 'CoinEx_Spanish']))
 async def message_listener(event):
-    if hasattr(event.message, 'sender') and event.message.sender.first_name != FROM_USERNAME:
+    if hasattr(event.message, 'sender') and event.message.sender.first_name == FROM_USERNAME:
         await my_event_handler(event)
 
 
