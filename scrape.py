@@ -76,7 +76,7 @@ async def my_event_handler(event):
         logger.error(f"[TelegramClientListener] {type(error).__name__}: {error}")
 
 
-@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID, 'CoinEx_Spanish']))
+@client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID]))
 async def message_listener(event):
     if hasattr(event.message, 'sender') and event.message.sender.first_name == FROM_USERNAME:
         await my_event_handler(event)
