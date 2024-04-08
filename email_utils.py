@@ -2,11 +2,12 @@ import smtplib
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formataddr
 
 
 def send_email(subject, sender, recipients, password, content, date, username, attachment_path=None):
     message = MIMEMultipart()
-    message['From'] = sender
+    message['From'] = formataddr(("SimplyDevTools", sender))
     message['To'] = ', '.join(recipients)
     message['Subject'] = subject
 
