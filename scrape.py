@@ -74,7 +74,7 @@ async def my_event_handler(event):
         logger.info(f"User: {username}, path: {saved_path}, date: {formatted_date}")
 
     except (BrokenPipeError, IOError) as error:
-        logger.error(f"[TelegramClientListener] {type(error).__name__}: {error}")
+        logger.error(f"[Send Email] {type(error).__name__}: {error}")
 
 
 @client.on(events.NewMessage(incoming=True, chats=[FROM_CHAT_ID]))

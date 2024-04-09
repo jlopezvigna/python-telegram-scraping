@@ -3,6 +3,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formataddr
+import os
 
 
 def send_email(subject, sender, recipients, password, content, date, username, attachment_path=None):
@@ -11,8 +12,11 @@ def send_email(subject, sender, recipients, password, content, date, username, a
     message['To'] = ', '.join(recipients)
     message['Subject'] = subject
 
+    current_directory = os.getcwd()
+    file = os.path.join(current_directory, 'template.html')
+
     # Add the template and replace the markers
-    with open('template.html', 'r') as f:
+    with open(file, 'r') as f:
         html_template = f.read()
 
     html_content = html_template.format(username=username, date=date, content=content)
