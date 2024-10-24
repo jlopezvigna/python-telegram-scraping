@@ -5,6 +5,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import pytz
 from email_utils import send_email
+from send_message import send_message
 
 load_dotenv()
 
@@ -67,7 +68,7 @@ async def my_event_handler(event):
         #    reply_message = await event.get_reply_message()
 
         send_email(SUBJECT, SENDER, [RECIPIENTS], PASSWORD, msg, formatted_date, username, saved_path)
-
+        send_message(msg, formatted_date, saved_path)
         if saved_path:
             os.remove(saved_path)
 
