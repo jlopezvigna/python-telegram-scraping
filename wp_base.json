@@ -1,0 +1,28 @@
+{
+  "messaging_product": "whatsapp",
+  "to": "",
+  "type": "template",
+  "template": {
+    "name": "",
+    "language": {
+      "code": "en_US"
+    },
+    "components": [
+      {
+        "type": "body",
+        "parameters": [
+          {
+            "type": "text",
+            "text": ""
+          },
+          {
+            "type": "date_time",
+            "date_time": {
+              "fallback_value": ""
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

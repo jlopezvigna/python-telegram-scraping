@@ -36,7 +36,7 @@ def send_message(text, date, file_path=None):
                 return
 
         # Cargar el JSON base
-        wp_template_dir = os.path.join(root_dir, "templates/wp_base.json")
+        wp_template_dir = os.path.join(current_dir, "wp_base.json")
 
         with open(wp_template_dir, 'r') as json_file:
             base_data = json.load(json_file)

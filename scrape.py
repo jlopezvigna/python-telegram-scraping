@@ -56,7 +56,7 @@ async def my_event_handler(event):
         date = event.date
 
         desired_timezone = pytz.timezone('America/Argentina/Buenos_Aires')
-        formatted_date = date.astimezone(desired_timezone).strftime("%d-%m-%Y %H:%M")
+        formatted_date = date.astimezone(desired_timezone).strftime("%d-%m %H:%M")
 
         saved_path = None
         if event.photo:
